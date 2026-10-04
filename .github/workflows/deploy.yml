@@ -3,6 +3,10 @@ name: Infrastructure CI/CD Pipeline
 on:
   push:
     branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   audit-and-scan:
@@ -12,23 +16,23 @@ jobs:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    - name: Audit Kernel Security Compliance
+    - name: Validate Security Configuration
       run: |
-        echo "🚀 [INFO] INITIATING AUTOMATED INFRASTRUCTURE AUDIT..."
-        echo "🔒 [CHECK] gVisor sandbox runtime architecture verification."
-        echo "🔒 [CHECK] Immutable read-only root filesystem compliance rules."
-        echo "🔒 [CHECK] Non-root security context configuration enforcement."
+        echo "[INFO] Checking declared container and runtime security controls..."
+        test -f Dockerfile
+        test -f kubernetes/pod.yaml
+        test -f terraform/main.tf
 
-    - name: Run Trivy Vulnerability Scanner
-      uses: aquasecurity/trivy-action@master
+    - name: Run Trivy Filesystem Scanner
+      uses: aquasecurity/trivy-action@v0.36.0
       with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'table'
+        scan-type: fs
+        scan-ref: .
+        format: table
         exit-code: '1'
         ignore-unfixed: true
-        severity: 'CRITICAL,HIGH'
+        severity: CRITICAL,HIGH
 
-    - name: Enforce Infrastructure Hardening Parameters
+    - name: Security Validation Summary
       run: |
-        echo -e "\n🏁 [SUCCESS] All security scans passed. Parameters successfully validated!"
+        echo "[SUCCESS] Repository checks and Trivy scan completed successfully."
