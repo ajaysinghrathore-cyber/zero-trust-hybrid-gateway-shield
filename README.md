@@ -26,4 +26,4 @@ The hardened subsystem successfully neutralized the payload execution in under a
 * `touch: cannot touch '/etc/nginx/nginx.conf': Permission denied`
 * `rm: cannot remove '/usr/share/nginx/html/index.html': Permission denied`
 
-This confirms complete containment compliance. No infrastructure elements or filesystem structures were altered or compromised.
+These results demonstrate that the tested write operations were denied by the configured permissions. They provide evidence for the tested control, not proof of complete system-wide containment.
