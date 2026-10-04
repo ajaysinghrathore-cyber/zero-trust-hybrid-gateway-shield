@@ -1,6 +1,6 @@
 # Automated Zero-Trust Cloud Infrastructure Hardening Pipeline
 
-An enterprise-grade hybrid infrastructure hardening and compliance audit pipeline. This repository demonstrates automated security engineering principles utilizing sandboxed runtimes, immutable system schemas, and boundary controls to achieve comprehensive system containment.
+A hands-on cloud and container security lab demonstrating infrastructure hardening and compliance-oriented controls. The repository combines Docker, Nginx, gVisor, Kubernetes, Terraform, and GitHub Actions to demonstrate layered security practices.
 
 ## 🛡️ Architecture & Hardening Matrix
 
