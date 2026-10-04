@@ -1,29 +1,48 @@
-# Automated Zero-Trust Cloud Infrastructure Hardening Pipeline
+# Zero-Trust Cloud Infrastructure Hardening Pipeline
 
-A hands-on cloud and container security lab demonstrating infrastructure hardening and compliance-oriented controls. The repository combines Docker, Nginx, gVisor, Kubernetes, Terraform, and GitHub Actions to demonstrate layered security practices.
+A hands-on cloud and container security lab demonstrating layered hardening controls across Docker, Nginx, gVisor, Kubernetes, Terraform, and GitHub Actions.
 
-## 🛡️ Architecture & Hardening Matrix
+## Architecture & controls
 
-| Security Layer | Implemented Control | Core Functionality |
-| :--- | :--- | :--- |
-| **Host Layer** | `Nginx Reverse Proxy` | Mitigates Layer 7 Distributed Denial of Service (DDoS) via strict `burst=1 nodelay` boundary controls. |
-| **Sandbox Runtime** | `Google gVisor (runsc)` | Eliminates shared-kernel vulnerabilities by establishing a strong virtualized architecture barrier between containers and the host. |
-| **Storage Security** | `Immutable Rootfs` | Forces strict read-only root filesystems across containers, rendering real-time ransomware file modifications completely impossible. |
-| **Identity Layer** | `Non-Root Execution` | Enforces specific non-root user UID/GID mapping (UID 101), strictly blocking administrative privilege escalation exploits. |
-| **Boundary Control** | `Host Isolation` | Restricts automated storage system integration blocks to protect primary filesystem schemas from virtual environment leaks. |
+| Layer | Control | Evidence |
+|---|---|---|
+| Container | Nginx container | `Dockerfile` |
+| Container hardening | Non-root execution | `Dockerfile` |
+| Runtime isolation | gVisor runtime class | `kubernetes/pod.yaml` |
+| Kubernetes | Non-root, read-only root filesystem, no privilege escalation, capability drop | `kubernetes/pod.yaml` |
+| Infrastructure as Code | AWS security group and EC2 resource | `terraform/main.tf` |
+| CI/CD security | Trivy HIGH/CRITICAL filesystem scan | `.github/workflows/deploy.yml` |
 
-## ⚙️ Automated CI/CD Lifecycle
+## Security controls
 
-The pipeline integrates an active multi-stage GitHub Actions automation engine to handle infrastructure security audits:
-1. **Source Synchronization:** Seamless repository code tracking checks.
-2. **Compliance Validation:** Automated verification models validating runtime schemas and storage parameters before deployment authorization.
+### Docker and Nginx
+The Dockerfile uses Nginx Alpine, prepares required runtime directories and runs the process as UID 101. The container metadata exposes port 80, matching the Kubernetes manifest.
 
-## 🏁 Forensic Malware Containment Verification
+### Kubernetes
+The Pod manifest declares:
+- gVisor through `runtimeClassName: gvisor`
+- UID/GID 101
+- `runAsNonRoot: true`
+- `readOnlyRootFilesystem: true`
+- `allowPrivilegeEscalation: false`
+- Linux capability drop: `ALL`
 
-The architecture's defensive strength was verified via a simulated ransomware exploitation attack executed within the container's environment layer. 
+The manifest is a security-focused lab configuration. A real deployment also needs a configured gVisor RuntimeClass and appropriate writable mounts/configuration for Nginx.
 
-The hardened subsystem successfully neutralized the payload execution in under a millisecond, returning absolute defensive system signals:
-* `touch: cannot touch '/etc/nginx/nginx.conf': Permission denied`
-* `rm: cannot remove '/usr/share/nginx/html/index.html': Permission denied`
+### CI/CD
+GitHub Actions checks the required security files and runs Trivy against the repository filesystem. The workflow is a CI security-validation pipeline; it should not be described as a complete production deployment pipeline.
 
-These results demonstrate that the tested write operations were denied by the configured permissions. They provide evidence for the tested control, not proof of complete system-wide containment.
+### Terraform / AWS
+Terraform defines an AWS security group and EC2 resource as infrastructure examples. The current configuration should be reviewed for AMI validity, network design and least-privilege requirements before any real deployment.
+
+## Validation
+
+Local tests such as denied write operations demonstrate the configured control for the tested scenario. They do not prove complete system-wide security, guaranteed ransomware prevention, guaranteed DDoS mitigation, or production readiness.
+
+## Security flow
+
+`Source → CI/CD → Trivy → Docker/Nginx → Hardening → gVisor → Kubernetes → Terraform/AWS → Runtime validation`
+
+## Skills demonstrated
+
+Docker · Nginx · Kubernetes · gVisor · Terraform · AWS · GitHub Actions · Trivy · Linux · Container Security · DevSecOps
